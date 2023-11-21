@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>그림판</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        canvas {
+            border: 1px solid black;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button id="pen" class="btn btn-primary">펜</button>
+        <button id="eraser" class="btn btn-secondary">지우개</button>
+        <button id="clear" class="btn btn-danger">화면 지우기</button>
+        <label for="brushSize">브러쉬 크기: </label>
+        <input type="range" id="brushSize" min="1" max="10" value="1">
+        <button id="save" class="btn btn-success">저장하기</button>
+        <canvas id="canvas" width="800" height="600"></canvas>
+    </div>
+
+    <script>
+        let canvas = document.getElementById('canvas');
+        let context = canvas.getContext('2d');
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+
+        canvas.addEventListener('mousedown', (e) => {
+            isDrawing = true;
+            [lastX, lastY] = [e.offsetX, e.offsetY];
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isDrawing) return;
+            context.beginPath();
+            context.moveTo(lastX, lastY);
+            context.lineTo(e.offsetX, e.offsetY);
+            context.stroke();
+            [lastX, lastY] = [e.offsetX, e.offsetY];
+        });
+
+        canvas.addEventListener('mouseup', () => isDrawing = false);
+        canvas.addEventListener('mouseout', () => isDrawing = false);
+
+        document.getElementById("pen").addEventListener("click", function() {
+            context.strokeStyle = 'black';
+            context.lineWidth = document.getElementById("brushSize").value;
+        });
+
+        document.getElementById("eraser").addEventListener("click", function() {
+            context.strokeStyle = 'white';
+            context.lineWidth = 30; // 지우개의 크기를 고정값으로 설정
+        });
+
+        document.getElementById("brushSize").addEventListener("input", function(e) {
+            if (context.strokeStyle !== 'white') { // 지우개 모드가 아닐 때만 굵기 조절
+                context.lineWidth = e.target.value;
+            }
+        });
+
+        document.getElementById("save").addEventListener("click", function() {
+            let image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+            window.location.href = image; // 이미지 다운로드
+        });
+
+        document.getElementById("clear").addEventListener("click", function() {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+        });
+    </script>
+</body>
+</html>
